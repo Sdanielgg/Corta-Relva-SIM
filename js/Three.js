@@ -24,6 +24,9 @@ const Volante=new THREE.Group()
     const RodaFrenteDireita=new THREE.Group();
     const RodaTrasDireita=new THREE.Group();
     const RodaTrasEsquerda=new THREE.Group();
+// Rodas a rodar
+    const RodasRodarDireita=new THREE.Group()
+    const RodasRodarEsquerda=new THREE.Group()
 // Banco
     const Banco=new THREE.Group()
 
@@ -32,14 +35,17 @@ function rodas() {
     let Pneu= new THREE.CylinderGeometry(0.3, 0.3, 0.6, 14);
     let material = new THREE.MeshBasicMaterial({color:"black"});
     let borracha= new THREE.MeshBasicMaterial({color:"white"});
+
     
     
     // Roda frente direita
     const rodaFR = new THREE.Mesh(roda, material);
     const pneuFR= new THREE.Mesh(Pneu,borracha)
-    RodaFrenteDireita.add(rodaFR,pneuFR,fixe())
-    RodaFrenteDireita.position.x = 2;
-    RodaFrenteDireita.position.y = -2;
+    RodaFrenteDireita.add(rodaFR,pneuFR,fixe())    
+    RodasRodarDireita.add(RodaFrenteDireita)
+    RodasRodarDireita.position.x = 2;
+    RodasRodarDireita.position.y = -2;
+
 
 
     // Roda frente esquerda
@@ -47,9 +53,10 @@ function rodas() {
     const rodaFL = new THREE.Mesh(roda, material);
     const pneuFL= new THREE.Mesh(Pneu,borracha);
     RodaFrenteEsquerda.add(rodaFL,pneuFL,fixe());
-    RodaFrenteEsquerda.position.x = 2;
-    RodaFrenteEsquerda.position.y = 2;
-    
+    RodasRodarEsquerda.add(RodaFrenteEsquerda)
+
+    RodasRodarEsquerda.position.x = 2;
+    RodasRodarEsquerda.position.y = 2;
 
     // Roda traseira direita
     
@@ -67,7 +74,7 @@ function rodas() {
     RodaTrasEsquerda.position.y = 2;
     RodaTrasEsquerda.add(rodaBL,pneuBL,fixe())
     // grupo rodas
-    cortaRelva.add( RodaFrenteDireita,RodaFrenteEsquerda,RodaTrasDireita,RodaTrasEsquerda);
+    cortaRelva.add( RodasRodarDireita,RodasRodarEsquerda,RodaTrasDireita,RodaTrasEsquerda);
 }
 function CriarVolante(){
     const Divisions=new THREE.Group()
@@ -175,25 +182,96 @@ document.addEventListener('keydown', (event) => {
 
     // Cima direita
     if (keys['ArrowUp'] && keys['ArrowRight']) {
+        // Rodas da frente a mudar de direção
+        RodasRodarEsquerda.rotation.z = -Math.PI/6
+        RodasRodarDireita.rotation.z = -Math.PI/6
+        // Todas as rodas a rodarem
+        RodaFrenteDireita.rotation.y+=0.1
+        RodaFrenteEsquerda.rotation.y+=0.1
+        RodaTrasDireita.rotation.y+=0.1
+        RodaTrasEsquerda.rotation.y+=0.1
 
+        Volante.rotation.z=8*Math.PI/7
         cortaRelva.rotation.z -= 0.01;
         cortaRelva.position.x += Math.cos(cortaRelva.rotation.z) * 0.1;
         cortaRelva.position.y += Math.sin(cortaRelva.rotation.z) * 0.1;
     }else if (keys['ArrowUp'] && keys['ArrowLeft']) {
+        // Rodas da frente a mudar de direção
+        RodasRodarEsquerda.rotation.z = Math.PI/6
+        RodasRodarDireita.rotation.z=Math.PI/6
 
+        // Todas as rodas a rodarem
+        RodaFrenteDireita.rotation.y+=0.1
+        RodaFrenteEsquerda.rotation.y+=0.1
+        RodaTrasDireita.rotation.y+=0.1
+        RodaTrasEsquerda.rotation.y+=0.1
+        // Volante
+        Volante.rotation.z=-Math.PI/7
+        // Corta Relva a mover-se no espaço
         cortaRelva.rotation.z += 0.01;
         cortaRelva.position.x += Math.cos(cortaRelva.rotation.z) * 0.1;
         cortaRelva.position.y += Math.sin(cortaRelva.rotation.z) * 0.1;
-    }else if (keys['ArrowDown'] && keys['ArrowLeft']) {
 
+    }else if (keys['ArrowDown'] && keys['ArrowLeft']) {
+        // Volante
+        Volante.rotation.z=-Math.PI/7
+        // Rodas da frente a mudar de direção
+        RodasRodarEsquerda.rotation.z = Math.PI/6
+        RodasRodarDireita.rotation.z=Math.PI/6
+        // Rodas a rodar
+        RodaFrenteDireita.rotation.y-=0.1
+        RodaFrenteEsquerda.rotation.y-=0.1
+        RodaTrasDireita.rotation.y-=0.1
+        RodaTrasEsquerda.rotation.y-=0.1
+        // Corta Relva a mover-se no espaço
         cortaRelva.rotation.z -= 0.01;
         cortaRelva.position.x -= Math.cos(cortaRelva.rotation.z) * 0.1;
         cortaRelva.position.y -= Math.sin(cortaRelva.rotation.z) * 0.1;
     }else if (keys['ArrowDown'] && keys['ArrowRight']) {
+        // Volante
+        Volante.rotation.z=8*Math.PI/7
+         // Rodas da frente a mudar de direção
+         RodasRodarEsquerda.rotation.z = -Math.PI/6
+         RodasRodarDireita.rotation.z = -Math.PI/6
+        // Rodas a rodar
+        RodaFrenteDireita.rotation.y-=0.1
+        RodaFrenteEsquerda.rotation.y-=0.1
+        RodaTrasDireita.rotation.y-=0.1
+        RodaTrasEsquerda.rotation.y-=0.1
 
+    // Corta Relva a mover-se no espaço
         cortaRelva.rotation.z += 0.01;
         cortaRelva.position.x -= Math.cos(cortaRelva.rotation.z) * 0.1;
         cortaRelva.position.y -= Math.sin(cortaRelva.rotation.z) * 0.1;
+    }else if(keys['ArrowUp']){
+        // Rodas a rodar
+        RodaFrenteDireita.rotation.y+=0.1
+        RodaFrenteEsquerda.rotation.y+=0.1
+        RodaTrasDireita.rotation.y+=0.1
+        RodaTrasEsquerda.rotation.y+=0.1 
+        // Corta Relva a mover-se no espaço
+        cortaRelva.position.x += Math.cos(cortaRelva.rotation.z) * 0.1;
+        cortaRelva.position.y += Math.sin(cortaRelva.rotation.z) * 0.1;
+    } else if (keys[ 'ArrowDown']) {
+        // Rodas a rodar
+        RodaFrenteDireita.rotation.y-=0.1
+        RodaFrenteEsquerda.rotation.y-=0.1
+        RodaTrasDireita.rotation.y-=0.1
+        RodaTrasEsquerda.rotation.y-=0.1
+        // Corta Relva a mover-se no espaço
+        cortaRelva.position.x -= Math.cos(cortaRelva.rotation.z) * 0.1;
+        cortaRelva.position.y -= Math.sin(cortaRelva.rotation.z) * 0.1;
+
+    } else if (keys[ 'ArrowLeft']) {
+        // Rodas da frente para a esquerda
+        RodasRodarDireita.rotation.z=Math.PI/6
+        RodasRodarEsquerda.rotation.z=Math.PI/6
+        Volante.rotation.z=-Math.PI/7
+    }else if(keys['ArrowRight']){
+        // Rodas da frente para a direita
+        RodasRodarDireita.rotation.z=-Math.PI/6
+        RodasRodarEsquerda.rotation.z=-Math.PI/6
+        Volante.rotation.z=8*Math.PI/7
     }
 });
 
@@ -202,41 +280,12 @@ document.addEventListener('keyup', (event) => {
 });
 
 
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowUp') {
-        // Move forward
-        cortaRelva.position.x += Math.cos(cortaRelva.rotation.z) * 0.1;
-        cortaRelva.position.y += Math.sin(cortaRelva.rotation.z) * 0.1;
-        RodaFrenteDireita.rotation.y+=0.1
-        RodaFrenteEsquerda.rotation.y+=0.1
-        RodaTrasDireita.rotation.y+=0.1
-        RodaTrasEsquerda.rotation.y+=0.1
-
-    } else if (event.key === 'ArrowDown') {
-        // Move backward
-        cortaRelva.position.x -= Math.cos(cortaRelva.rotation.z) * 0.1;
-        cortaRelva.position.y -= Math.sin(cortaRelva.rotation.z) * 0.1;
-        RodaFrenteDireita.rotation.y-=0.1
-        RodaFrenteEsquerda.rotation.y-=0.1
-        RodaTrasDireita.rotation.y-=0.1
-        RodaTrasEsquerda.rotation.y-=0.1
-    } else if (event.key === 'ArrowLeft') {
-        // Rotate left
-        RodaFrenteDireita.rotation.z = Math.PI/6
-        RodaFrenteEsquerda.rotation.z=Math.PI/6
-        Volante.rotation.z=-Math.PI/7
-    }else if(event.key==='ArrowRight'){
-        RodaFrenteDireita.rotation.z = -Math.PI/6
-        RodaFrenteEsquerda.rotation.z=-Math.PI/6
-        Volante.rotation.z=8*Math.PI/7
-    }
-});
 
 document.addEventListener("keyup", (event) => {
     if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
         // Reset wheels to the neutral position when the key is released
-        RodaFrenteDireita.rotation.z = 0;
-        RodaFrenteEsquerda.rotation.z = 0;
+        RodasRodarDireita.rotation.z = 0;
+        RodasRodarEsquerda.rotation.z = 0;
         Volante.rotation.z=-Math.PI/2
     }
 });
