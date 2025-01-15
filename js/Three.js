@@ -5,7 +5,7 @@ const scene = new THREE.Scene();
 
 /* CAMERA: create a camera, which defines where we're looking at */
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.z = 10 ;
+// camera.position.z = 10 ;
 camera.position.y = -6;
 // camera.position.x=1
 
@@ -13,6 +13,11 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor("LIGHTGREEN");
 document.body.appendChild(renderer.domElement);
+// Variaveis
+let maxSpeed=0.04
+let minSpeed=-0.02
+let speed=0
+let lastpressed
 
 // Inicialização de Grupos de Objetos
 // Objeto Principal
@@ -175,7 +180,12 @@ function createObject() {
 }
 
 const keys = {};
-
+function movimento(){
+    if (speed!=0){
+        cortaRelva.position.x += Math.cos(cortaRelva.rotation.z) * speed;
+        cortaRelva.position.y += Math.sin(cortaRelva.rotation.z) * speed;
+    }
+}
 // duas teclas ao mesmo tempo
 document.addEventListener('keydown', (event) => {
     keys[event.key] = true; 
@@ -244,23 +254,31 @@ document.addEventListener('keydown', (event) => {
         cortaRelva.position.x -= Math.cos(cortaRelva.rotation.z) * 0.1;
         cortaRelva.position.y -= Math.sin(cortaRelva.rotation.z) * 0.1;
     }else if(keys['ArrowUp']){
+        lastpressed="ArrowUp"
+        if(speed<maxSpeed){
+            speed+=0.005
+        } else if(speed==maxSpeed){
+            speed=maxSpeed
+        }
         // Rodas a rodar
         RodaFrenteDireita.rotation.y+=0.1
         RodaFrenteEsquerda.rotation.y+=0.1
         RodaTrasDireita.rotation.y+=0.1
         RodaTrasEsquerda.rotation.y+=0.1 
         // Corta Relva a mover-se no espaço
-        cortaRelva.position.x += Math.cos(cortaRelva.rotation.z) * 0.1;
-        cortaRelva.position.y += Math.sin(cortaRelva.rotation.z) * 0.1;
     } else if (keys[ 'ArrowDown']) {
+        lastpressed="ArrowDown"
+        if(speed>minSpeed){
+            speed-=0.005
+        } else if(speed==minSpeed){
+            speed=minSpeed
+        }
         // Rodas a rodar
         RodaFrenteDireita.rotation.y-=0.1
         RodaFrenteEsquerda.rotation.y-=0.1
         RodaTrasDireita.rotation.y-=0.1
         RodaTrasEsquerda.rotation.y-=0.1
         // Corta Relva a mover-se no espaço
-        cortaRelva.position.x -= Math.cos(cortaRelva.rotation.z) * 0.1;
-        cortaRelva.position.y -= Math.sin(cortaRelva.rotation.z) * 0.1;
 
     } else if (keys[ 'ArrowLeft']) {
         // Rodas da frente para a esquerda
@@ -276,10 +294,21 @@ document.addEventListener('keydown', (event) => {
 });
 
 document.addEventListener('keyup', (event) => {
-    keys[event.key] = false; 
+    keys[event.key] = false;
 });
+function regulateMovimento(){    
+    if(speed<0 &&lastpressed==="ArrowUp"){
+        speed=0
+    }else if(speed>0 &&lastpressed==="ArrowDown"){
+        speed=0
+    }
+    else if(speed!==0 && speed>0){
+        speed-=0.0005
+    }else if(speed!==0 && speed<0){
+        speed+=0.0005
+    }
 
-
+}
 
 document.addEventListener("keyup", (event) => {
     if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
@@ -293,6 +322,9 @@ createObject();
 
 // Animation loop
 renderer.setAnimationLoop(() => {
+    
     camera.lookAt(0, 0, 0);
     renderer.render(scene, camera);
+    movimento();
+    regulateMovimento()
 });
