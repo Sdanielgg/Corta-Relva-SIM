@@ -5,7 +5,7 @@ const scene = new THREE.Scene();
 
 /* CAMERA: create a camera, which defines where we're looking at */
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-// camera.position.z = 10 ;
+camera.position.z = 5
 camera.position.y = -6;
 // camera.position.x=1
 
@@ -34,6 +34,8 @@ const Volante=new THREE.Group()
     const RodasRodarEsquerda=new THREE.Group()
 // Banco
     const Banco=new THREE.Group()
+// Corpo corta relva(blocos e isso)
+    const Corpo=new THREE.Group()
 
 function rodas() {
     let roda = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 14);
@@ -46,18 +48,17 @@ function rodas() {
     // Roda frente direita
     const rodaFR = new THREE.Mesh(roda, material);
     const pneuFR= new THREE.Mesh(Pneu,borracha)
-    RodaFrenteDireita.add(rodaFR,pneuFR,fixe())    
+    RodaFrenteDireita.add(rodaFR,pneuFR,picosPneus())    
     RodasRodarDireita.add(RodaFrenteDireita)
     RodasRodarDireita.position.x = 2;
     RodasRodarDireita.position.y = -2;
-
 
 
     // Roda frente esquerda
     
     const rodaFL = new THREE.Mesh(roda, material);
     const pneuFL= new THREE.Mesh(Pneu,borracha);
-    RodaFrenteEsquerda.add(rodaFL,pneuFL,fixe());
+    RodaFrenteEsquerda.add(rodaFL,pneuFL,picosPneus());
     RodasRodarEsquerda.add(RodaFrenteEsquerda)
 
     RodasRodarEsquerda.position.x = 2;
@@ -67,7 +68,7 @@ function rodas() {
     
     const rodaBR = new THREE.Mesh(roda, material);
     const pneuBR= new THREE.Mesh(Pneu,borracha);
-    RodaTrasDireita.add(rodaBR,pneuBR,fixe())
+    RodaTrasDireita.add(rodaBR,pneuBR,picosPneus())
     RodaTrasDireita.position.x = -2;
     RodaTrasDireita.position.y = -2;
 
@@ -77,7 +78,7 @@ function rodas() {
     const pneuBL= new THREE.Mesh(Pneu,borracha)
     RodaTrasEsquerda.position.x = -2;
     RodaTrasEsquerda.position.y = 2;
-    RodaTrasEsquerda.add(rodaBL,pneuBL,fixe())
+    RodaTrasEsquerda.add(rodaBL,pneuBL,picosPneus())
     // grupo rodas
     cortaRelva.add( RodasRodarDireita,RodasRodarEsquerda,RodaTrasDireita,RodaTrasEsquerda);
 }
@@ -90,11 +91,13 @@ function CriarVolante(){
     const radialSegments = 8;  
     const tubularSegments = 14;  
     const VolanteMaterial1 = new THREE.MeshBasicMaterial({ color: "black"});
+
     const circulo = new THREE.TorusGeometry(
         radius, tubeRadius,
         radialSegments, tubularSegments );
+
     const circuloObjeto =new THREE.Mesh(circulo,VolanteMaterial1)
-    circuloObjeto.position.z=2
+    // circuloObjeto.position.z=2
     // Divisões do Volante
     const cilDivis= new THREE.CylinderGeometry(0.06,0.06,0.3,20)
     const Div1=new THREE.Mesh(cilDivis,VolanteMaterial2)
@@ -109,33 +112,34 @@ function CriarVolante(){
     Div3.position.y=-0.11
     Div3.rotation.z=0
     Divisions.add(Div1, Div2,Div3)
-    Divisions.position.z=2
+    // Divisions.position.z=2
     Volante.add(circuloObjeto,Divisions)
     Volante.rotation.z=-Math.PI/2
-    Volante.position.x=1
+    Volante.rotation.y=-Math.PI/4
+    Volante.position.z=1.8
+    Volante.position.x=1.5
+    // Volante
     cortaRelva.add(Volante)
 }
 function CriarBanco(){
-    const BancoMaterial = new THREE.MeshBasicMaterial({ color: "brown"});
+    const BancoMaterial = new THREE.MeshBasicMaterial({ color: "#8B634B"});
     const BlocoBanco = new THREE.BoxGeometry( 0.5, 1, 1 );
 // Costas
     const CostasBanco=new THREE.Mesh(BlocoBanco,BancoMaterial)
-    CostasBanco.position.z=0.5
+    CostasBanco.position.z=0.75
 // Assento
     const AssentoBanco=new THREE.Mesh(BlocoBanco,BancoMaterial)
     AssentoBanco.rotation.y=Math.PI/2
     AssentoBanco.position.x=0.5
-    AssentoBanco.position.z=0.25
+    AssentoBanco.position.z=0.5
 // posição do banco no corta relva
     Banco.position.z=0.5
+    Banco.position.x=-0.5
     Banco.add(CostasBanco,AssentoBanco)
 
     cortaRelva.add(Banco)
-
-
-
 }
-function fixe(){
+function picosPneus(){
     const CoisinhosGrupo=new THREE.Group()
     let roda = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 14);
     let material = new THREE.MeshBasicMaterial({color:"black"});
@@ -169,13 +173,36 @@ function fixe(){
     CoisinhosGrupo.add(a1,a2,a3,a4,a5,a6,a7,a8)
     return CoisinhosGrupo
 }
-// function corpoCortaRelva(){
+function corpoCortaRelva(){
+    const CorpoMaterial = new THREE.MeshBasicMaterial({ color: "green"});
+
+    // const BlocoBanco = new THREE.BoxGeometry( 0.5, 1, 1 );
+
+    const PlataformaForma=new THREE.BoxGeometry(4,3.5,0.5)
+    const Plataforma=new THREE.Mesh(PlataformaForma,CorpoMaterial)
+
+
+    const MotorForma=new THREE.BoxGeometry(2,2,2)
+    const motor=new THREE.Mesh(MotorForma,CorpoMaterial)
+    motor.position.z=0.7
+    motor.position.x=2.5
+
+    const BlocoTrasForma=new THREE.BoxGeometry(2,3.5,0.5)
+    const BlocoTras=new THREE.Mesh(BlocoTrasForma,CorpoMaterial)
+    BlocoTras.position.z=0.5
+    BlocoTras.position.x=-0.5
     
-// }
+
+    // Adicionar ao grupo do objeto
+
+    cortaRelva.add(motor,Plataforma,BlocoTras)
+
+}
 function createObject() {
     CriarBanco()
     rodas();
     CriarVolante()
+    corpoCortaRelva()
     scene.add(cortaRelva);
 }
 
@@ -192,6 +219,13 @@ document.addEventListener('keydown', (event) => {
 
     // Cima direita
     if (keys['ArrowUp'] && keys['ArrowRight']) {
+        lastpressed="ArrowUp"
+        if(speed<maxSpeed){
+            speed+=0.005
+        } else if(speed==maxSpeed){
+            speed=maxSpeed
+        }
+        // Rodas a rodar
         // Rodas da frente a mudar de direção
         RodasRodarEsquerda.rotation.z = -Math.PI/6
         RodasRodarDireita.rotation.z = -Math.PI/6
@@ -200,12 +234,17 @@ document.addEventListener('keydown', (event) => {
         RodaFrenteEsquerda.rotation.y+=0.1
         RodaTrasDireita.rotation.y+=0.1
         RodaTrasEsquerda.rotation.y+=0.1
-
+        // Volante
         Volante.rotation.z=8*Math.PI/7
-        cortaRelva.rotation.z -= 0.01;
-        cortaRelva.position.x += Math.cos(cortaRelva.rotation.z) * 0.1;
-        cortaRelva.position.y += Math.sin(cortaRelva.rotation.z) * 0.1;
+        // Rodar o corta relva
+        cortaRelva.rotation.z -= 0.02;
     }else if (keys['ArrowUp'] && keys['ArrowLeft']) {
+        lastpressed="ArrowUp"
+        if(speed<maxSpeed){
+            speed+=0.005
+        } else if(speed==maxSpeed){
+            speed=maxSpeed
+        }
         // Rodas da frente a mudar de direção
         RodasRodarEsquerda.rotation.z = Math.PI/6
         RodasRodarDireita.rotation.z=Math.PI/6
@@ -218,11 +257,15 @@ document.addEventListener('keydown', (event) => {
         // Volante
         Volante.rotation.z=-Math.PI/7
         // Corta Relva a mover-se no espaço
-        cortaRelva.rotation.z += 0.01;
-        cortaRelva.position.x += Math.cos(cortaRelva.rotation.z) * 0.1;
-        cortaRelva.position.y += Math.sin(cortaRelva.rotation.z) * 0.1;
+        cortaRelva.rotation.z += 0.02;
 
     }else if (keys['ArrowDown'] && keys['ArrowLeft']) {
+        lastpressed="ArrowDown"
+        if(speed>minSpeed){
+            speed-=0.005
+        } else if(speed==minSpeed){
+            speed=minSpeed
+        }
         // Volante
         Volante.rotation.z=-Math.PI/7
         // Rodas da frente a mudar de direção
@@ -234,10 +277,15 @@ document.addEventListener('keydown', (event) => {
         RodaTrasDireita.rotation.y-=0.1
         RodaTrasEsquerda.rotation.y-=0.1
         // Corta Relva a mover-se no espaço
-        cortaRelva.rotation.z -= 0.01;
-        cortaRelva.position.x -= Math.cos(cortaRelva.rotation.z) * 0.1;
-        cortaRelva.position.y -= Math.sin(cortaRelva.rotation.z) * 0.1;
+        cortaRelva.rotation.z -= 0.02;
+
     }else if (keys['ArrowDown'] && keys['ArrowRight']) {
+        lastpressed="ArrowDown"
+        if(speed>minSpeed){
+            speed-=0.005
+        } else if(speed==minSpeed){
+            speed=minSpeed
+        }
         // Volante
         Volante.rotation.z=8*Math.PI/7
          // Rodas da frente a mudar de direção
@@ -248,11 +296,9 @@ document.addEventListener('keydown', (event) => {
         RodaFrenteEsquerda.rotation.y-=0.1
         RodaTrasDireita.rotation.y-=0.1
         RodaTrasEsquerda.rotation.y-=0.1
+        // Corta Relva a mover-se no espaço
+        cortaRelva.rotation.z += 0.02;
 
-    // Corta Relva a mover-se no espaço
-        cortaRelva.rotation.z += 0.01;
-        cortaRelva.position.x -= Math.cos(cortaRelva.rotation.z) * 0.1;
-        cortaRelva.position.y -= Math.sin(cortaRelva.rotation.z) * 0.1;
     }else if(keys['ArrowUp']){
         lastpressed="ArrowUp"
         if(speed<maxSpeed){
