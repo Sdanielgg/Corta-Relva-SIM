@@ -5,9 +5,15 @@ const scene = new THREE.Scene();
 
 /* CAMERA: create a camera, which defines where we're looking at */
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.z = 5
+// camera.position.z = 5
 camera.position.y = -6;
 // camera.position.x=1
+
+// Luz
+let light = new THREE.AmbientLight( 0xfff2cc,1 );
+// add light to the scene
+scene.add( light );
+
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -18,6 +24,9 @@ let maxSpeed=0.04
 let minSpeed=-0.02
 let speed=0
 let lastpressed
+let RodaRotation=0
+let RodaMaxRotation=0.005
+let RodaMinRotation=-0.005
 
 // Inicialização de Grupos de Objetos
 // Objeto Principal
@@ -36,6 +45,17 @@ const Volante=new THREE.Group()
     const Banco=new THREE.Group()
 // Corpo corta relva(blocos e isso)
     const Corpo=new THREE.Group()
+    function CriarRelva(position){
+    const relvaMaterial=new THREE.MeshBasicMaterial({color:"green"})
+    const relvaAltaForma=new THREE.BoxGeometry(2,2,0.5)
+    const relvaAlta=new THREE.Mesh(relvaAltaForma,relvaMaterial)
+    const relvaCurtaForma=new THREE.BoxGeometry(2,2,0.2)
+    const relvaCurta=new THREE.Mesh(relvaCurtaForma,relvaMaterial)
+    relvaAlta.position.x=position+1
+    relvaAlta.position.z=-0.5
+    relvaCurta.position.z=-0.65
+    scene.add(relvaCurta,relvaAlta)
+    }
 
 function rodas() {
     let roda = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 14);
@@ -174,7 +194,12 @@ function picosPneus(){
     return CoisinhosGrupo
 }
 function corpoCortaRelva(){
-    const CorpoMaterial = new THREE.MeshBasicMaterial({ color: "green"});
+    const CorpoMaterial = new THREE.MeshPhongMaterial({
+        color: 0x93c47d,
+        shininess:100,
+        emissive: 0x3424324,
+
+    });
 
     // const BlocoBanco = new THREE.BoxGeometry( 0.5, 1, 1 );
 
@@ -199,18 +224,27 @@ function corpoCortaRelva(){
 
 }
 function createObject() {
+    CriarRelva(0)
     CriarBanco()
     rodas();
     CriarVolante()
     corpoCortaRelva()
     scene.add(cortaRelva);
 }
-
+for (let i=0;i<3;i++){
+    CriarRelva(i)
+}
 const keys = {};
 function movimento(){
     if (speed!=0){
         cortaRelva.position.x += Math.cos(cortaRelva.rotation.z) * speed;
         cortaRelva.position.y += Math.sin(cortaRelva.rotation.z) * speed;
+        // Rodas
+        RodaFrenteDireita.rotation.y+=RodaRotation
+        RodaFrenteEsquerda.rotation.y+=RodaRotation
+        RodaTrasDireita.rotation.y+=RodaRotation
+        RodaTrasEsquerda.rotation.y+=RodaRotation
+        
     }
 }
 // duas teclas ao mesmo tempo
@@ -224,6 +258,11 @@ document.addEventListener('keydown', (event) => {
             speed+=0.005
         } else if(speed==maxSpeed){
             speed=maxSpeed
+        }
+        if(RodaRotation<RodaMaxRotation){
+            RodaRotation+=0.001
+        }else if(RodaRotation==RodaMaxRotation){
+            RodaRotation=RodaMaxRotation
         }
         // Rodas a rodar
         // Rodas da frente a mudar de direção
@@ -244,6 +283,11 @@ document.addEventListener('keydown', (event) => {
             speed+=0.005
         } else if(speed==maxSpeed){
             speed=maxSpeed
+        }
+        if(RodaRotation<RodaMaxRotation){
+            RodaRotation+=0.001
+        }else if(RodaRotation==RodaMaxRotation){
+            RodaRotation=RodaMaxRotation
         }
         // Rodas da frente a mudar de direção
         RodasRodarEsquerda.rotation.z = Math.PI/6
@@ -266,6 +310,11 @@ document.addEventListener('keydown', (event) => {
         } else if(speed==minSpeed){
             speed=minSpeed
         }
+        if(RodaRotation>RodaMinRotation){
+            RodaRotation-=0.001
+        }else if(RodaRotation==RodaMinRotation){
+            RodaRotation=RodaMaxRotation
+        }
         // Volante
         Volante.rotation.z=-Math.PI/7
         // Rodas da frente a mudar de direção
@@ -285,6 +334,11 @@ document.addEventListener('keydown', (event) => {
             speed-=0.005
         } else if(speed==minSpeed){
             speed=minSpeed
+        }
+        if(RodaRotation>RodaMinRotation){
+            RodaRotation-=0.001
+        }else if(RodaRotation==RodaMinRotation){
+            RodaRotation=RodaMaxRotation
         }
         // Volante
         Volante.rotation.z=8*Math.PI/7
@@ -306,6 +360,11 @@ document.addEventListener('keydown', (event) => {
         } else if(speed==maxSpeed){
             speed=maxSpeed
         }
+        if(RodaRotation<RodaMaxRotation){
+            RodaRotation+=0.001
+        }else if(RodaRotation==RodaMaxRotation){
+            RodaRotation=RodaMaxRotation
+        }
         // Rodas a rodar
         RodaFrenteDireita.rotation.y+=0.1
         RodaFrenteEsquerda.rotation.y+=0.1
@@ -318,6 +377,11 @@ document.addEventListener('keydown', (event) => {
             speed-=0.005
         } else if(speed==minSpeed){
             speed=minSpeed
+        }
+        if(RodaRotation>RodaMinRotation){
+            RodaRotation-=0.001
+        }else if(RodaRotation==RodaMinRotation){
+            RodaRotation=RodaMaxRotation
         }
         // Rodas a rodar
         RodaFrenteDireita.rotation.y-=0.1
@@ -342,11 +406,15 @@ document.addEventListener('keydown', (event) => {
 document.addEventListener('keyup', (event) => {
     keys[event.key] = false;
 });
+
+
 function regulateMovimento(){    
     if(speed<0 &&lastpressed==="ArrowUp"){
         speed=0
+        RodaRotation=0
     }else if(speed>0 &&lastpressed==="ArrowDown"){
         speed=0
+        RodaRotation=0  
     }
     else if(speed!==0 && speed>0){
         speed-=0.0005
