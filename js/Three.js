@@ -4,16 +4,15 @@ import * as THREE from 'three';
 const scene = new THREE.Scene();
 
 /* CAMERA: create a camera, which defines where we're looking at */
-const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-// camera.position.z = 5
-camera.position.y = -6;
-// camera.position.x=1
+
 
 // Luz
-let light = new THREE.AmbientLight( 0xfff2cc,1 );
+let light = new THREE.PointLight( 0xffffff,5 );
 // add light to the scene
-scene.add( light );
+light.position.z=20
+light.intensity=1000
 
+scene.add( light );
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -27,7 +26,7 @@ let lastpressed
 let RodaRotation=0
 let RodaMaxRotation=0.005
 let RodaMinRotation=-0.005
-
+let GrassGroup=[]
 // Inicialização de Grupos de Objetos
 // Objeto Principal
 const cortaRelva = new THREE.Group();
@@ -45,17 +44,40 @@ const Volante=new THREE.Group()
     const Banco=new THREE.Group()
 // Corpo corta relva(blocos e isso)
     const Corpo=new THREE.Group()
-    function CriarRelva(position){
-    const relvaMaterial=new THREE.MeshBasicMaterial({color:"green"})
-    const relvaAltaForma=new THREE.BoxGeometry(2,2,0.5)
-    const relvaAlta=new THREE.Mesh(relvaAltaForma,relvaMaterial)
-    const relvaCurtaForma=new THREE.BoxGeometry(2,2,0.2)
-    const relvaCurta=new THREE.Mesh(relvaCurtaForma,relvaMaterial)
-    relvaAlta.position.x=position+1
-    relvaAlta.position.z=-0.5
-    relvaCurta.position.z=-0.65
-    scene.add(relvaCurta,relvaAlta)
+
+function CriarRelva(Tamanho){
+    let grassBlocksNumber=0
+    for (let i=0;i<Tamanho;i++){
+        for(let k=0;k<Tamanho;k++){
+            
+            const relvaMaterial=new THREE.MeshBasicMaterial({color:"green"})
+            const relvaAltaForma=new THREE.BoxGeometry(3,3,0.5)
+            const relvaAlta=new THREE.Mesh(relvaAltaForma,relvaMaterial)
+            
+            relvaAlta.name=`Relva_${grassBlocksNumber}`
+            relvaAlta.position.set(i*3,k*3,-0.5)
+            GrassGroup.push(relvaAlta)
+            grassBlocksNumber++
+        }
     }
+    console.log(GrassGroup)
+    for(let i=0;i<GrassGroup.length;i++){
+        scene.add(GrassGroup[i])
+    }
+}
+function cortarRelva(){
+    console.log(GrassGroup.length)
+    for (let i=0;i<GrassGroup.length;i++){
+        
+        const objeto=scene.getObjectByName(`Relva_${i}`)
+        if(-1.5<cortaRelva.position.x-objeto.position.x &&
+             cortaRelva.position.x-objeto.position.x<1.5&&
+             -1.5<cortaRelva.position.y-objeto.position.y&&
+             cortaRelva.position.y-objeto.position.y<1.5){
+            objeto.material.color.set("LIGHTGREEN");
+        }
+    }
+}
 
 function rodas() {
     let roda = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 14);
@@ -224,16 +246,15 @@ function corpoCortaRelva(){
 
 }
 function createObject() {
-    CriarRelva(0)
+    CriarRelva(5)
     CriarBanco()
     rodas();
     CriarVolante()
     corpoCortaRelva()
-    scene.add(cortaRelva);
+    scene.add(cortaRelva);    
+    
 }
-for (let i=0;i<3;i++){
-    CriarRelva(i)
-}
+
 const keys = {};
 function movimento(){
     if (speed!=0){
@@ -247,7 +268,7 @@ function movimento(){
         
     }
 }
-// duas teclas ao mesmo tempo
+
 document.addEventListener('keydown', (event) => {
     keys[event.key] = true; 
 
@@ -290,8 +311,8 @@ document.addEventListener('keydown', (event) => {
             RodaRotation=RodaMaxRotation
         }
         // Rodas da frente a mudar de direção
-        RodasRodarEsquerda.rotation.z = Math.PI/6
-        RodasRodarDireita.rotation.z=Math.PI/6
+        RodasRodarEsquerda.rotation.z = Math.PI/7
+        RodasRodarDireita.rotation.z=Math.PI/7
 
         // Todas as rodas a rodarem
         RodaFrenteDireita.rotation.y+=0.1
@@ -318,8 +339,8 @@ document.addEventListener('keydown', (event) => {
         // Volante
         Volante.rotation.z=-Math.PI/7
         // Rodas da frente a mudar de direção
-        RodasRodarEsquerda.rotation.z = Math.PI/6
-        RodasRodarDireita.rotation.z=Math.PI/6
+        RodasRodarEsquerda.rotation.z = Math.PI/7
+        RodasRodarDireita.rotation.z=Math.PI/7
         // Rodas a rodar
         RodaFrenteDireita.rotation.y-=0.1
         RodaFrenteEsquerda.rotation.y-=0.1
@@ -343,8 +364,8 @@ document.addEventListener('keydown', (event) => {
         // Volante
         Volante.rotation.z=8*Math.PI/7
          // Rodas da frente a mudar de direção
-         RodasRodarEsquerda.rotation.z = -Math.PI/6
-         RodasRodarDireita.rotation.z = -Math.PI/6
+         RodasRodarEsquerda.rotation.z = -Math.PI/7
+         RodasRodarDireita.rotation.z = -Math.PI/7
         // Rodas a rodar
         RodaFrenteDireita.rotation.y-=0.1
         RodaFrenteEsquerda.rotation.y-=0.1
@@ -391,14 +412,14 @@ document.addEventListener('keydown', (event) => {
         // Corta Relva a mover-se no espaço
 
     } else if (keys[ 'ArrowLeft']) {
-        // Rodas da frente para a esquerda
-        RodasRodarDireita.rotation.z=Math.PI/6
-        RodasRodarEsquerda.rotation.z=Math.PI/6
+                // Rodas da frente para a esquerda
+        RodasRodarDireita.rotation.z=Math.PI/7
+        RodasRodarEsquerda.rotation.z=Math.PI/7
         Volante.rotation.z=-Math.PI/7
     }else if(keys['ArrowRight']){
         // Rodas da frente para a direita
-        RodasRodarDireita.rotation.z=-Math.PI/6
-        RodasRodarEsquerda.rotation.z=-Math.PI/6
+        RodasRodarDireita.rotation.z=-Math.PI/7
+        RodasRodarEsquerda.rotation.z=-Math.PI/7
         Volante.rotation.z=8*Math.PI/7
     }
 });
@@ -419,11 +440,10 @@ function regulateMovimento(){
     else if(speed!==0 && speed>0){
         speed-=0.0005
     }else if(speed!==0 && speed<0){
-        speed+=0.0005
+        speed+=0.0003
     }
 
 }
-
 document.addEventListener("keyup", (event) => {
     if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
         // Reset wheels to the neutral position when the key is released
@@ -436,9 +456,15 @@ createObject();
 
 // Animation loop
 renderer.setAnimationLoop(() => {
-    
-    camera.lookAt(0, 0, 0);
+
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    let relativeOffset = new THREE.Vector3(0, 0,15);
+    let cameraOffset = relativeOffset.applyMatrix4(cortaRelva.matrixWorld);
+    camera.position.copy(cameraOffset);
+    camera.rotation.set(0,0,-Math.PI/2)
+
     renderer.render(scene, camera);
+    cortarRelva()
     movimento();
     regulateMovimento()
 });
