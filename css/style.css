@@ -1,3 +1,24 @@
 html, body {
-    margin: 0;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column-reverse;
   }
+canvas{
+  justify-content: center;
+}
+#ProgressBar{
+  margin-top:20px;
+  padding: 5px;
+  font-size: larger;
+  text-align: center;
+  background-color: grey;
+  width: 90%;
+  border-radius:10px;
+}
+#Progress{
+  background-color: green;
+  height: 20px;
+  border-radius:10px;
+}

@@ -3,21 +3,17 @@ import * as THREE from 'three';
 /* SCENE: create an empty scene, that will hold all the elements */
 const scene = new THREE.Scene();
 
-/* CAMERA: create a camera, which defines where we're looking at */
-
-
 // Luz
 let light = new THREE.PointLight( 0xffffff,5 );
-// add light to the scene
 light.position.z=20
 light.intensity=1000
-
 scene.add( light );
 
 const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(window.innerWidth/1.2, window.innerHeight/1.2);
 renderer.setClearColor("LIGHTGREEN");
 document.body.appendChild(renderer.domElement);
+
 // Variaveis
 let maxSpeed=0.04
 let minSpeed=-0.02
@@ -27,7 +23,11 @@ let RodaRotation=0
 let RodaMaxRotation=0.005
 let RodaMinRotation=-0.005
 let GrassGroup=[]
+let ProgressValue=0
+let Progress =document.getElementById("Progress")
+Progress.style.width=0
 // Inicialização de Grupos de Objetos
+
 // Objeto Principal
 const cortaRelva = new THREE.Group();
 // Volante
@@ -42,8 +42,25 @@ const Volante=new THREE.Group()
     const RodasRodarEsquerda=new THREE.Group()
 // Banco
     const Banco=new THREE.Group()
-// Corpo corta relva(blocos e isso)
-    const Corpo=new THREE.Group()
+ // Texturas
+ const textureLoader = new THREE.TextureLoader();
+const baseColor = textureLoader.load("../Textures/wispy-grass-meadow_albedo.png");
+const normalMap = textureLoader.load("../Textures/wispy-grass-meadow_normal-ogl.png");
+const roughnessMap = textureLoader.load("../Textures/wispy-grass-meadow_roughness.png");
+const aoMap = textureLoader.load("../Textures/wispy-grass-meadow_ao.png");
+
+// Chão 
+const FloorGeometry=new THREE.PlaneGeometry(50,50)
+const chaoMaterial = new THREE.MeshStandardMaterial({
+    map: baseColor,          // Base color texture
+    normalMap:normalMap,    // Normal map for surface details
+    roughnessMap: roughnessMap, // Roughness map for shininess
+    aoMap: aoMap,            // Ambient occlusion map
+  });
+const floor=new THREE.Mesh(FloorGeometry,chaoMaterial)
+floor.position.z=-0.5
+scene.add(floor)
+
 
 function CriarRelva(Tamanho){
     let grassBlocksNumber=0
@@ -65,27 +82,33 @@ function CriarRelva(Tamanho){
         scene.add(GrassGroup[i])
     }
 }
+
 function cortarRelva(){
-    console.log(GrassGroup.length)
     for (let i=0;i<GrassGroup.length;i++){
-        
         const objeto=scene.getObjectByName(`Relva_${i}`)
         if(-1.5<cortaRelva.position.x-objeto.position.x &&
              cortaRelva.position.x-objeto.position.x<1.5&&
              -1.5<cortaRelva.position.y-objeto.position.y&&
-             cortaRelva.position.y-objeto.position.y<1.5){
-            objeto.material.color.set("LIGHTGREEN");
+             cortaRelva.position.y-objeto.position.y<1.5&&
+             objeto.material!=chaoMaterial){
+            objeto.material=chaoMaterial
+            ProgressValue+=100/GrassGroup.length
+            Progress.style.width=ProgressValue+"%"
+            // CheckWin
+            if(Progress.style.width==="100%" ){
+                alert("Cortaste a Relva toda!")
+            }
         }
     }
 }
 
+
+// Deve haver forma de optimizar isto mas por enquanto é assim
 function rodas() {
     let roda = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 14);
     let Pneu= new THREE.CylinderGeometry(0.3, 0.3, 0.6, 14);
     let material = new THREE.MeshBasicMaterial({color:"black"});
     let borracha= new THREE.MeshBasicMaterial({color:"white"});
-
-    
     
     // Roda frente direita
     const rodaFR = new THREE.Mesh(roda, material);
@@ -123,6 +146,40 @@ function rodas() {
     RodaTrasEsquerda.add(rodaBL,pneuBL,picosPneus())
     // grupo rodas
     cortaRelva.add( RodasRodarDireita,RodasRodarEsquerda,RodaTrasDireita,RodaTrasEsquerda);
+}
+function picosPneus(){
+    const CoisinhosGrupo=new THREE.Group()
+    let roda = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 14);
+    let material = new THREE.MeshBasicMaterial({color:"black"});
+    let quadradinho=new THREE.BoxGeometry(0.2,0.5,0.3)
+    let a1=new THREE.Mesh(quadradinho,material)
+    a1.position.z=-0.5;
+    a1.rotation.y=Math.PI/2
+    let a2=new THREE.Mesh(quadradinho,material)
+    a2.position.z=0.5;
+    a2.rotation.y=Math.PI/2
+    let a3=new THREE.Mesh(quadradinho,material)
+    a3.position.x=0.5
+    let a4=new THREE.Mesh(quadradinho,material)
+    a4.position.x=-0.5
+    let a5=new THREE.Mesh(quadradinho,material)
+    a5.position.x=0.5*Math.cos(Math.PI/4)
+    a5.position.z=0.5*Math.cos(Math.PI/4)
+    a5.rotation.y=-Math.PI/4
+    let a6=new THREE.Mesh(quadradinho,material)
+    a6.position.x=-0.5*Math.cos(Math.PI/4)
+    a6.position.z=0.5*Math.cos(Math.PI/4)
+    a6.rotation.y=Math.PI/4
+    let a7=new THREE.Mesh(quadradinho,material)
+    a7.position.x=-0.5*Math.cos(Math.PI/4)
+    a7.position.z=-0.5*Math.cos(Math.PI/4)
+    a7.rotation.y=-Math.PI/4
+    let a8=new THREE.Mesh(quadradinho,material)
+    a8.position.x=0.5*Math.cos(Math.PI/4)
+    a8.position.z=-0.5*Math.cos(Math.PI/4)
+    a8.rotation.y=Math.PI/4
+    CoisinhosGrupo.add(a1,a2,a3,a4,a5,a6,a7,a8)
+    return CoisinhosGrupo
 }
 function CriarVolante(){
     const Divisions=new THREE.Group()
@@ -181,40 +238,7 @@ function CriarBanco(){
 
     cortaRelva.add(Banco)
 }
-function picosPneus(){
-    const CoisinhosGrupo=new THREE.Group()
-    let roda = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 14);
-    let material = new THREE.MeshBasicMaterial({color:"black"});
-    let quadradinho=new THREE.BoxGeometry(0.2,0.5,0.3)
-    let a1=new THREE.Mesh(quadradinho,material)
-    a1.position.z=-0.5;
-    a1.rotation.y=Math.PI/2
-    let a2=new THREE.Mesh(quadradinho,material)
-    a2.position.z=0.5;
-    a2.rotation.y=Math.PI/2
-    let a3=new THREE.Mesh(quadradinho,material)
-    a3.position.x=0.5
-    let a4=new THREE.Mesh(quadradinho,material)
-    a4.position.x=-0.5
-    let a5=new THREE.Mesh(quadradinho,material)
-    a5.position.x=0.5*Math.cos(Math.PI/4)
-    a5.position.z=0.5*Math.cos(Math.PI/4)
-    a5.rotation.y=-Math.PI/4
-    let a6=new THREE.Mesh(quadradinho,material)
-    a6.position.x=-0.5*Math.cos(Math.PI/4)
-    a6.position.z=0.5*Math.cos(Math.PI/4)
-    a6.rotation.y=Math.PI/4
-    let a7=new THREE.Mesh(quadradinho,material)
-    a7.position.x=-0.5*Math.cos(Math.PI/4)
-    a7.position.z=-0.5*Math.cos(Math.PI/4)
-    a7.rotation.y=-Math.PI/4
-    let a8=new THREE.Mesh(quadradinho,material)
-    a8.position.x=0.5*Math.cos(Math.PI/4)
-    a8.position.z=-0.5*Math.cos(Math.PI/4)
-    a8.rotation.y=Math.PI/4
-    CoisinhosGrupo.add(a1,a2,a3,a4,a5,a6,a7,a8)
-    return CoisinhosGrupo
-}
+
 function corpoCortaRelva(){
     const CorpoMaterial = new THREE.MeshPhongMaterial({
         color: 0x93c47d,
@@ -246,16 +270,17 @@ function corpoCortaRelva(){
 
 }
 function createObject() {
-    CriarRelva(5)
-    CriarBanco()
+    CriarRelva(4)
+    CriarBanco();
     rodas();
     CriarVolante()
     corpoCortaRelva()
+    cortaRelva.position.x=-6
     scene.add(cortaRelva);    
-    
 }
 
 const keys = {};
+
 function movimento(){
     if (speed!=0){
         cortaRelva.position.x += Math.cos(cortaRelva.rotation.z) * speed;
@@ -268,7 +293,22 @@ function movimento(){
         
     }
 }
+function regulateMovimento(){    
+    if(speed<0 &&lastpressed==="ArrowUp"){
+        speed=0
+        RodaRotation=0
+    }else if(speed>0 &&lastpressed==="ArrowDown"){
+        speed=0
+        RodaRotation=0  
+    }
+    else if(speed!==0 && speed>0){
+        speed-=0.0005
+    }else if(speed!==0 && speed<0){
+        speed+=0.0003
+    }
 
+}
+// Teclas
 document.addEventListener('keydown', (event) => {
     keys[event.key] = true; 
 
@@ -429,36 +469,24 @@ document.addEventListener('keyup', (event) => {
 });
 
 
-function regulateMovimento(){    
-    if(speed<0 &&lastpressed==="ArrowUp"){
-        speed=0
-        RodaRotation=0
-    }else if(speed>0 &&lastpressed==="ArrowDown"){
-        speed=0
-        RodaRotation=0  
-    }
-    else if(speed!==0 && speed>0){
-        speed-=0.0005
-    }else if(speed!==0 && speed<0){
-        speed+=0.0003
-    }
-
-}
+// Volante  e rodas posição default
 document.addEventListener("keyup", (event) => {
     if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-        // Reset wheels to the neutral position when the key is released
+
         RodasRodarDireita.rotation.z = 0;
         RodasRodarEsquerda.rotation.z = 0;
         Volante.rotation.z=-Math.PI/2
     }
 });
+
+
 createObject();
 
 // Animation loop
 renderer.setAnimationLoop(() => {
 
     const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-    let relativeOffset = new THREE.Vector3(0, 0,15);
+    let relativeOffset = new THREE.Vector3(0, 0,25);
     let cameraOffset = relativeOffset.applyMatrix4(cortaRelva.matrixWorld);
     camera.position.copy(cameraOffset);
     camera.rotation.set(0,0,-Math.PI/2)
